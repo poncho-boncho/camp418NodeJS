@@ -1,78 +1,39 @@
 const fs = require('fs');
-const read = require('readline-sync');
+const readlineSync = require('readline-sync');
+const dir = './questions/';
 
-function getRandom(min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
+var filesName = fs.readdirSync (dir);
+var score =0;
+var poolFiles= [];
+var q=0;
+var variant;
+
+function getRandomFile(min , max) {
+    return Math.floor(Math.random() * (max - min) ) + min;
 }
 
-function getCountFiles(path) {
-    let files = fs.readdirSync(path);
-    return files.length;
-}
+for (var i =0; poolFiles.length<5;) {
+    let fileContent = fs.readFileSync(dir + filesName[getRandomFile(0, filesName.length)], "utf8");
 
-function getSelectQuestions(path, countQ) {
-    const countAll = getCountFiles(path);
-    let selected = [];
-
-    do {
-        let sel = getRandom(1, countAll);
-
-        if (!selected.includes(sel)) {
-            selected.push(sel);
-        }
-    } while(selected.length != countQ);
-
-    return selected;
-}
-
-function readQuestion(file) {
-    return fs.readFileSync(file).toString().split('\n');
-}
-
-function getQuiz(path) {
-    const N_Q = 0;
-    const N_A = 1;
-    const N_V = 2;
-
-    const count = 5;
-    let selected = getSelectQuestions(path, count);
-    const quiz = [];
-
-    for(let i = 0; i < count; i++) {
-        let q = readQuestion(path + selected[i] + '.txt');
-        let variants = [];
-
-        for(let j = N_V; j < q.length - 1; j++) {
-            variants.push(`\t${j - 1}) ${q[j]}`);
-        }
-
-        quiz.push({
-            question: q[N_Q],
-            answer: q[N_A],
-            variants: variants
-        });
-    }
-
-    return quiz;
-}
-
-const path = "./questions/";
-const quiz = getQuiz(path);
-let score = 0;
-let choice;
-
-for(let i = 0; i < quiz.length; i++) {
-    console.log("\n" + quiz[i].question);
-
-    for(let j = 0; j < quiz[i].variants.length; j++) {
-        console.log(quiz[i].variants[j]);
-    }
-
-    choice = +read.question("Enter number: ");
-
-    if(choice == quiz[i].answer) {
-        score++;
+    if (poolFiles.indexOf(fileContent)==-1){
+        poolFiles.push(fileContent);
+        i++;
     }
 }
 
-console.log(`\nВаш счёт: ${score} / ${quiz.length}`);
+while (q<5) {
+    var lineFile = poolFiles[q].toString().split("\n");
+    console.log(lineFile[0] + '\n');
+
+    for (var i = 2; i < lineFile.length; i++) {
+        variant=i;
+        console.log(variant-1+")"+lineFile[i]);
+    }
+
+    var user = readlineSync.question('\n');
+
+    if (user == lineFile[1][0])
+        score += 1;
+    q++;
+}
+console.log("Правильных ответов = "+score+"/"+q);
